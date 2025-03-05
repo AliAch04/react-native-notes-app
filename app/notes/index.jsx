@@ -1,17 +1,36 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { View, Text, StyleSheet, TouchableOpacity,} from "react-native";
 import NoteList from "@/components/NoteList";
 import AddNoteModal from "@/components/AddNoteModal";
+import noteService from '@/services/noteService'
 
 const NoteScreen = () =>{
-    const [notes, setNotes] = useState([
-        {id : 1, text: 'Test Note One'},
-        {id : 2, text: 'Test Note Two'},
-        {id : 3, text: 'Test Note three'},
-    ]);
+    const [notes, setNotes] = useState([]);
 
     const [modalVisible, setModalVisible] = useState(false)
     const [newNote, setNewNote] = useState('')
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState(null)
+
+    useEffect(()=>{
+        fetchNote();
+    }, [])
+
+    const fetchNote = async () =>{
+        setLoading(true);
+        const response = await noteService.getNotes();
+
+        if(response.error){
+            setError(response.error);
+            Alert.alert('Error', response.error)
+
+        }else{
+            setNotes(response.data);
+            setError(null);
+        }
+
+        setLoading(false)
+    }
 
     const addNote = () => {
         if(newNote.trim() === "") return;
